@@ -73,7 +73,7 @@
           			<manifest>
                 		<addClasspath>true</addClasspath>
                 		<classpathPrefix>lib/</classpathPrefix>
-                		<mainClass>com.arcada.devops.niskanjo.demoapp.App</mainClass>
+                		<mainClass>fi.arcada.devops.niskanjo.todolist.App</mainClass>
           			</manifest>
         		</archive>
       		</configuration>
