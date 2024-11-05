@@ -78,10 +78,12 @@
         		</archive>
       		</configuration>
         </plugin>
+       
         <plugin>
           <artifactId>maven-install-plugin</artifactId>
           <version>3.1.2</version>
         </plugin>
+        
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>3.1.2</version>
@@ -97,5 +99,31 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+    	<plugin>
+       		<!-- Build a Docker image with Exec Maven Plugin-->
+        	<groupId>org.codehaus.mojo</groupId>
+        	<artifactId>exec-maven-plugin</artifactId>
+        	<version>3.0.0</version>
+        	<executions>
+        		<execution>
+        			<id>docker-build</id>
+        			<phase>install</phase>
+        			<goals>
+        				<goal>exec</goal>
+        			</goals>
+        			<configuration>
+        				<executable>docker</executable>
+        				<arguments>
+        					<argument>build</argument>
+        					<argument>-t</argument>
+        					<argument>niskanjo.todolist</argument>
+        					<argument>.</argument>
+        				</arguments>
+        			</configuration>
+        		</execution>
+        	</executions>
+        </plugin>
+    </plugins>
   </build>
 </project>
