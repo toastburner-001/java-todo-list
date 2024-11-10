@@ -40,7 +40,8 @@
       <artifactId>junit-jupiter-params</artifactId>
       <scope>test</scope>
     </dependency>
-  </dependencies>
+	</dependencies>
+  
 
   <build>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
@@ -118,7 +119,7 @@
                 		<arguments>
                     		<argument>rmi</argument>
                     		<argument>-f</argument>
-                    		<argument>${project.artifactId}</argument>
+                    		<argument>toastburner001/${project.artifactId}:${project.version}</argument>
                 		</arguments>
             		</configuration>
         		</execution>
@@ -132,8 +133,13 @@
         				<executable>docker</executable>
         				<arguments>
         					<argument>build</argument>
+        					<!-- Arguments for dynamic filenames -->
+        					<argument>--build-arg</argument>
+        					<argument>ARTIFACT_ID=${project.artifactId}</argument>
+        					<argument>--build-arg</argument>
+        					<argument>VERSION=${project.version}</argument>
         					<argument>-t</argument>
-        					<argument>${project.artifactId}</argument>
+        					<argument>toastburner001/${project.artifactId}:${project.version}</argument>
         					<argument>.</argument>
         				</arguments>
         			</configuration>
@@ -150,7 +156,7 @@
 						<arguments>
 							<argument>push</argument>
 							<argument>-a</argument>
-							<argument>toastburner-001/${project.artifactId}:${project.version}</argument>
+							<argument>toastburner001/${project.artifactId}:${project.version}</argument>
 						</arguments>
 					</configuration>
 				</execution>
