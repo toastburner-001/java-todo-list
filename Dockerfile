@@ -12,3 +12,7 @@ COPY target/${ARTIFACT_ID}-${VERSION}.jar /app/todolist.jar
 
 # Run the JAR file
 ENTRYPOINT ["java", "-jar", "/app/todolist.jar"]
+
+# Expose port
+EXPOSE 8080
+
