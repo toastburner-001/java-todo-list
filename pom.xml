@@ -73,7 +73,7 @@
           			<manifest>
                 		<addClasspath>true</addClasspath>
                 		<classpathPrefix>lib/</classpathPrefix>
-                		<mainClass>fi.arcada.devops.niskanjo.todolist.App</mainClass>
+                		<mainClass>${project.groupId}.${project.artifactId}.App</mainClass>
           			</manifest>
         		</archive>
       		</configuration>
@@ -106,6 +106,22 @@
         	<artifactId>exec-maven-plugin</artifactId>
         	<version>3.0.0</version>
         	<executions>
+        		 <execution>
+        		 <!-- Remove existing Docker image -->
+            		<id>docker-remove</id>
+            		<phase>install</phase>
+           			<goals>
+                		<goal>exec</goal>
+            		</goals>
+            		<configuration>
+                		<executable>docker</executable>
+                		<arguments>
+                    		<argument>rmi</argument>
+                    		<argument>-f</argument>
+                    		<argument>${project.artifactId}</argument>
+                		</arguments>
+            		</configuration>
+        		</execution>
         		<execution>
         			<id>docker-build</id>
         			<phase>install</phase>
@@ -117,11 +133,27 @@
         				<arguments>
         					<argument>build</argument>
         					<argument>-t</argument>
-        					<argument>niskanjo.todolist</argument>
+        					<argument>${project.artifactId}</argument>
         					<argument>.</argument>
         				</arguments>
         			</configuration>
         		</execution>
+        		<execution>
+        		<!-- Push image to Docker Hub -->
+					<id>docker-push</id>
+					<phase>deploy</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+					<configuration>
+						<executable>docker</executable>
+						<arguments>
+							<argument>push</argument>
+							<argument>-a</argument>
+							<argument>toastburner-001/${project.artifactId}:${project.version}</argument>
+						</arguments>
+					</configuration>
+				</execution>
         	</executions>
         </plugin>
     </plugins>
