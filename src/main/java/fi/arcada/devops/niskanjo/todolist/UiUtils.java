@@ -28,10 +28,9 @@ public class UiUtils {
         // Loop until valid input is provided
         while (true) {
             System.out.println(prompt);
-            String input = "";
-            while (scanner.hasNextLine()) {
-            	input = scanner.nextLine();
-            }
+            
+            String input = scanner.nextLine();
+            
             
 	        // Check if input matches the regex pattern
 	        if (input.matches(regexPattern)) {
@@ -43,7 +42,7 @@ public class UiUtils {
 	        }
             
         }
-        scanner.close();
+
 
         return validInput;
     }

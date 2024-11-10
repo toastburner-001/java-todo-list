@@ -5,7 +5,7 @@
 
   <groupId>fi.arcada.devops</groupId>
   <artifactId>niskanjo.todolist</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
 
   <name>niskanjo.todolist</name>
   <!-- FIXME change it to the project's website -->
