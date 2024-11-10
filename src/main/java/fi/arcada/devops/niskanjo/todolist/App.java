@@ -2,112 +2,77 @@ package fi.arcada.devops.niskanjo.todolist;
 
 import java.util.ArrayList;
 
+import com.sun.net.httpserver.HttpServer;
+
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpExchange;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+
+
 /**
  * Hello world!
  */
 public class App {
-    public static void main(String[] args) {
-    	String username = "";
-    	boolean authSuccess = false;
+	public static void main(String[] args) throws IOException {
+		HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+		server.createContext("/", new FormHandler());
+		server.setExecutor(null); // creates a default executor
+		server.start();
+		System.out.println("Server started on port 8080");
+	}
+	
+	static class FormHandler implements HttpHandler {
+		@Override
+		public void handle(HttpExchange exchange) throws IOException {
+			if ("GET".equals(exchange.getRequestMethod())) {
+				
+				String response = "<html><body>" + "<form method='POST'>" + "Username: <input type='text' name='username'><br>"
+						+ "Password: <input type='password' name='password'><br>"
+						+ "<input type='submit' value='Submit'>" + "</form>" + "</body></html>";
+				exchange.sendResponseHeaders(200, response.getBytes().length);
+				OutputStream os = exchange.getResponseBody();
+				os.write(response.getBytes());
+				os.close();
+				
+			} else if ("POST".equals(exchange.getRequestMethod())) {
+				
+				StringBuilder sb = new StringBuilder();
+				try (var is = exchange.getRequestBody()) {
+					int i;
+					while ((i = is.read()) != -1)
+					{
+						sb.append((char) i);
+					}
+				}
+				String[] params = sb.toString().split("&");
+				String username = params[0].split("=")[1];
+				String password = params[1].split("=")[1];
 
-    	// Prompt username and password, loop until valid credentials are received
-    	while (!authSuccess) {
-    		username = UiUtils.getInput("Enter username:");
-    		String password = UiUtils.getInput("Enter password:");
-    		
-    		authSuccess = Database.authenticate(username, password);
-    		
-    		if (!authSuccess) {
-    			System.out.println("Wrong username or password, try again.");
-    		}
-    	}
-    	
-    	// Get task list associated with user
-    	if (authSuccess) {
-    		
-    		ArrayList<Task> taskList = Database.getTaskList(username);
-        	System.out.println("Welcome to the Task List Manager!");
-            
-            String mainMenuOptions = "1. Create new task\n2. Browse task list\n3. Exit\n";
-            // Main menu loop
-    		while (true) {
-    			System.out.println("------------------------------------");
-    	        String mainSelection = UiUtils.validateInput("[1-3]",
-    	        		mainMenuOptions + "Please select an option by typing a number from the menu and press Enter.",
-    	        		"Invalid input, please try again.");
-    	        
-    	        if (mainSelection.equals("1")) {
-    	        	Task newTask = TaskUtils.createNewTask();
-    	        	
-    	        	taskList.add(newTask);
-    	        	
-    	        	
-    	        } else if (mainSelection.equals("2")) {
-    	        	if (taskList.size() <= 0) {
-    	        		System.out.println("There are no tasks in the list.");
-    	        	} else {
-    	        		// Enter task list loop
-    	        		while (true) {
-    	        			System.out.println("------------------------------------");
-    	        			if (taskList.size() <= 0) {
-    	        				System.out.println("No tasks in list, exiting to menu...");
-    	        				break;
-    	        			}
-    	        			
-    	        			System.out.println("[0] Back to main menu");
-    	        			
-    	        			for (int i = 0; i < taskList.size(); i++) {
-    	        				System.out.printf("[%d] %s [DONE: %b]\n", (i + 1), taskList.get(i).getTitle(), taskList.get(i).getDone());
-    	        			}
-    	        			
-    	        			String taskListSelection = UiUtils.validateInput("[0-" + taskList.size() + "]", "Select a task from the menu for further options." , "Invalid input, please try again.");
-    	        			
-    	        			if (taskListSelection.matches("[1-" + taskList.size() + "]")) {	        		
-    	        				int taskIndex = Integer.parseInt(taskListSelection);
-    	        				
-    	        				Task selectedTask = taskList.get(taskIndex - 1);
-    	        			
-    	        				// Task options loop
-    		        			while (true) {
-    		        				System.out.println("------------------------------------");
-    		        				System.out.println("Title: " + selectedTask.getTitle());
-    		        				System.out.println("DONE: " + selectedTask.getDone());
-    		        				System.out.printf("[0] Back to task list\n[1] Change title\n[2] Set done true/false\n[3] Delete task\n");
-    		        				String taskOptionsSelection = UiUtils.validateInput("[0-3]", "Choose an option from the menu.", "Invalid input, please try again.");
-    		        				
-    		        				if (taskOptionsSelection.equals("1")) {
-    		        					TaskUtils.changeTaskTitle(selectedTask);
-    		        				} else if (taskOptionsSelection.equals("2")) {
-    		        					
-    		        					if (selectedTask.getDone() == false) {
-    		        						selectedTask.setDone(true);
-    		        					} else {
-    		        						selectedTask.setDone(false);
-    		        					}
-    		        				} else if (taskOptionsSelection.equals("3")) {
-    		        					// Remove task
-    		        					taskList.remove(taskIndex - 1);
-    		        					System.out.println("Task removed successfully.");
-    		        					break;
-    		        				} else if (taskOptionsSelection.equals("0")) {
-    		        					break;
-    		        				}
-    		        				
-    		        			} 
-    	        			} else if (taskListSelection.equals("0")) {
-    	        				break;
-    	        			}
-    	        		}
-    	        		
-    	 
-    	        	}
-    	        } else if (mainSelection.equals("3")) {
-    	        	System.out.println("Thank you for using the Task List Manager. Have a great day!");
-    	        	// Exit loop
-    	        	break;
-    	        }
-            }
-    	}
-    	
-    }
+				String response;
+				if (Database.authenticate(username, password))
+				{
+					final ArrayList<Task> taskList = Database.getTaskList(username);
+					StringBuilder taskListStr = new StringBuilder();
+					
+					taskListStr.append("Welcome to the Task List Manager! Here is your task list.\n");
+					for (int i = 0; i < taskList.size(); i++) {
+        				taskListStr.append(String.format("[%d] %s [DONE: %b]\n", (i + 1), taskList.get(i).getTitle(), taskList.get(i).getDone()));
+        			}
+					
+					response = (taskListStr.toString());
+				} else
+				{
+					response = "Wrong username or password.";
+				}
+
+				exchange.sendResponseHeaders(200, response.getBytes().length);
+				OutputStream os = exchange.getResponseBody();
+				os.write(response.getBytes());
+				os.close();
+			}
+		}
+	}
 }
